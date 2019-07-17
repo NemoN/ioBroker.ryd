@@ -1,4 +1,3 @@
-![Logo](admin/ryd.png)
 # ioBroker.ryd
 
 [![NPM version](http://img.shields.io/npm/v/iobroker.ryd.svg)](https://www.npmjs.com/package/iobroker.ryd)
