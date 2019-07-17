@@ -1,7 +1,7 @@
 {
   "name": "iobroker.ryd",
-  "version": "0.0.1",
-  "description": "Ryd Box car locator",
+  "version": "0.3.0",
+  "description": "Ryd Box (former TankTaler) car locator",
   "author": {
     "name": "NemoN",
     "email": "thomas.oeding@gmail.com"
@@ -10,6 +10,8 @@
   "license": "MIT",
   "keywords": [
     "ryd",
+    "tanktaler",
+    "odb2",
     "car",
     "gps",
     "location"
@@ -19,7 +21,10 @@
     "url": "https://github.com/NemoN/ioBroker.ryd"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^1.0.3"
+    "@iobroker/adapter-core": "^1.0.3",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.7",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@iobroker/testing": "^1.2.5",
@@ -27,7 +32,7 @@
     "@types/chai-as-promised": "^7.1.0",
     "@types/gulp": "^4.0.6",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^10.14.9",
+    "@types/node": "^10.14.12",
     "@types/proxyquire": "^1.3.28",
     "@types/sinon": "^7.0.13",
     "@types/sinon-chai": "^3.2.2",
@@ -37,7 +42,8 @@
     "eslint": "^5.16.0",
     "gulp": "^4.0.2",
     "mocha": "^6.1.4",
-    "proxyquire": "^2.1.0",
+    "proxyquire": "^2.1.1",
+    "request-debug": "^0.2.0",
     "sinon": "^7.3.2",
     "sinon-chai": "^3.3.0"
   },

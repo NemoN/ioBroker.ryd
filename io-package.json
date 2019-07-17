@@ -1,55 +1,45 @@
 {
 	"common": {
 		"name": "ryd",
-		"version": "0.0.1",
+		"version": "0.3.0",
 		"news": {
+			"0.3.0": {
+				"en": "First open beta release",
+				"de": "Erste offene Betaversion"
+			},
+			"0.2.1": {
+				"en": "Configuration of internal parameters",
+				"de": "Konfiguration interne Parameter"
+			},
+			"0.2.0": {
+				"en": "Beta release",
+				"de": "Betaversion"
+			},
 			"0.0.1": {
-				"en": "initial release",
-				"de": "Erstveröffentlichung",
-				"ru": "Начальная версия",
-				"pt": "lançamento inicial",
-				"nl": "Eerste uitgave",
-				"fr": "Première version",
-				"it": "Versione iniziale",
-				"es": "Versión inicial",
-				"pl": "Pierwsze wydanie",
-				"zh-cn": "首次出版"
+				"en": "Initial release",
+				"de": "Erstveröffentlichung"
 			}
 		},
-		"title": "Ryd Box",
+		"title": "Ryd (TankTaler) ODB2 Adapter",
 		"titleLang": {
-			"en": "Ryd Box",
-			"de": "Ryd Box",
-			"ru": "Ryd Box",
-			"pt": "Ryd Box",
-			"nl": "Ryd Box",
-			"fr": "Ryd Box",
-			"it": "Ryd Box",
-			"es": "Caja ryd",
-			"pl": "Ryd Box",
-			"zh-cn": "Ryd Box"
+			"en": "Ryd (TankTaler) ODB2 Adapter",
+			"de": "Ryd (TankTaler) ODB2 Adapter"
 		},
 		"desc": {
-			"en": "Ryd Box car locator",
-			"de": "Ryd Box Auto Finder",
-			"ru": "Ryd Box автомобильный локатор",
-			"pt": "Ryd Box localizador de carros",
-			"nl": "Ryd Box auto locator",
-			"fr": "Localisateur de voiture Ryd Box",
-			"it": "Localizzatore di auto Ryd Box",
-			"es": "Localizador de coches Ryd Box",
-			"pl": "Lokalizator samochodów Ryd Box",
-			"zh-cn": "Ryd Box汽车定位器"
+			"en": "Provides various vehicle data and location",
+			"de": "Liefert diverse Fahrzeugdaten und Standort"
 		},
 		"authors": [
 			"NemoN <thomas.oeding@gmail.com>"
 		],
 		"keywords": [
-			"ryd",
-			"car",
-			"gps",
-			"location"
-		],
+	      "ryd",
+	      "tanktaler",
+	      "odb2",
+	      "car",
+	      "gps",
+	      "location"
+	    ],
 		"license": "MIT",
 		"platform": "Javascript/Node.js",
 		"main": "main.js",
@@ -58,7 +48,8 @@
 		"extIcon": "https://raw.githubusercontent.com/NemoN/ioBroker.ryd/master/admin/ryd.png",
 		"readme": "https://github.com/NemoN/ioBroker.ryd/blob/master/README.md",
 		"loglevel": "info",
-		"mode": "daemon",
+		"mode": "schedule",
+		"schedule": "*/15 * * * *",
 		"type": "geoposition",
 		"compact": true,
 		"materialize": true,
@@ -69,8 +60,19 @@
 		]
 	},
 	"native": {
-		"option1": true,
-		"option2": "42"
+		"email": "",
+		"password": "",
+		"thinkProperties": "curLocation,parkingLocation,carOdometer,estimates,reportedFuelTotal,fuel",
+		"thinkPropertiesIgnore": "recurrences,openDtcs,score",
+		"adapterTimeout": 10000,
+		"clientDeviceType": "Android",
+		"clientDeviceId": "SM-G960F",
+		"clientDeviceVersion": "9.0.0",
+		"clientDeviceResolution": "2960x1440",
+		"rydApiServer": "https://tt4.thinxcloud.de",
+		"rydAppVersion": "2.35.1(190423000)",
+		"rydAppLocale": "de-de",
+		"rydAppInternalName": "TankTaler"
 	},
 	"objects": [],
 	"instanceObjects": []

@@ -8,3 +8,9 @@
 }
 
 /* Add your styles here */
+.hint {
+	width: 40px;
+    float: left;
+    margin-right: 5px;
+    margin-top: 9px;
+}

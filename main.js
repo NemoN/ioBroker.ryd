@@ -8,8 +8,12 @@
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
 
-// Load your modules here, e.g.:
-// const fs = require("fs");
+// Custom modules
+const uuid = require('uuid/v4');
+// const util = require('util');
+const http_request = require('request-promise-native');
+
+var gthis;
 
 class Ryd extends utils.Adapter {
 
@@ -21,64 +25,249 @@ class Ryd extends utils.Adapter {
 			...options,
 			name: "ryd",
 		});
+
 		this.on("ready", this.onReady.bind(this));
-		this.on("objectChange", this.onObjectChange.bind(this));
-		this.on("stateChange", this.onStateChange.bind(this));
-		// this.on("message", this.onMessage.bind(this));
 		this.on("unload", this.onUnload.bind(this));
+
+		this._shutdown = false;
 	}
 
 	/**
 	 * Is called when databases are connected and adapter received configuration.
 	 */
 	async onReady() {
-		// Initialize your adapter here
+		gthis = this;
 
-		// The adapters config (in the instance object everything under the attribute "native") is accessible via
-		// this.config:
-		this.log.info("config option1: " + this.config.option1);
-		this.log.info("config option2: " + this.config.option2);
+		this._adapter_randomness = Math.floor(Math.random() * 60000 + 1); // add max 60 seconds randomness
+		this._adapter_timeout = parseInt(this.config.adapterTimeout, 10) || 10000;
+		this._adapter_delay = 10 * 60 * 1000; // in ms
 
-		/*
-		For every state in the system there has to be also an object of type state
-		Here a simple template for a boolean variable named "testVariable"
-		Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-		*/
-		await this.setObjectAsync("testVariable", {
-			type: "state",
-			common: {
-				name: "testVariable",
-				type: "boolean",
-				role: "indicator",
-				read: true,
-				write: true,
-			},
-			native: {},
+		this._think_properties = this.config.thinkProperties.split(',');
+		this._think_properties_ignore = this.config.thinkPropertiesIgnore.split(',');
+
+		if (!this.config.email) {
+			this.log.info("setup missing: email is empty. stopping adapter now.");
+			this.stop();
+			return false;
+		} else if (!this.config.password) {
+			this.log.info("setup missing: password empty. stopping adapter now.");
+			this.stop();
+			return false;
+		}
+
+		this._ryd_api_server = this.config.rydApiServer;
+		// this._ryd_api_server = 'http://www.nemon.org/ryd'; // DEBUG
+
+		this._client_device_type = this.config.clientDeviceType;
+		this._client_device_id = this.config.clientDeviceId;
+		this._client_device_version = this.config.clientDeviceVersion;
+		this._client_device_resolution = this.config.clientDeviceResolution;
+
+		this._ryd_app_version = this.config.rydAppVersion;
+		this._ryd_app_locale = this.config.rydAppLocale;
+		this._ryd_app_platform = this._client_device_type + ' [' + this._client_device_id + ',' + this._client_device_version + ',' + this._client_device_resolution + ']';
+		this._ryd_app_user_agent = this.config.rydAppInternalName + '/' + this._ryd_app_version + '(' + this._client_device_id + '; ' + this._client_device_type + ' ' + this._client_device_version + ')';
+
+		this._ryd_auth_token = '';
+		this._ryd_things = [ {} ];
+
+		this._base_request = http_request.defaults({
+		    gzip: true,
+			timeout: 2000,
+		    headers: {
+		        'x-txn-platform': this._ryd_app_platform,
+		        'Cache-Control': 'no-cache, no-store, must-revalidate',
+		        'Pragma': 'no-cache',
+		        'Expires': 0,
+		        'x-txn-app-version': this._ryd_app_version,
+		        'User-agent': this._ryd_app_user_agent,
+		        'X-Txn-Request-Id': uuid(),
+		        'X-Txn-Locale': this._ryd_app_locale,
+		        'Content-Type': 'application/json; charset=utf-8'
+		    }
+		})
+
+		this.log.info("account: " + this.config.email);
+		this.log.debug("adapter timeout: " + this._adapter_timeout + " ms");
+		this.log.debug("think properties: " + this._think_properties);
+		this.log.debug("think properties ignore: " + this._think_properties_ignore);
+
+		await this.getState('lastUpdate', function (err, state) {
+			if (state != null) {
+				let now = new Date().getTime();
+				if (now < (state.ts + gthis._adapter_delay)) {
+					gthis.log.info("adapter ran less than " + (gthis._adapter_delay/1000) + " seconds earlier. trying again later.");
+					gthis.stop(); // stop adapter right here (on schedule mode)
+				}
+			}
 		});
 
-		// in this template all states changes inside the adapters namespace are subscribed
-		this.subscribeStates("*");
+		this._queryRydServer();
 
-		/*
-		setState examples
-		you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-		*/
-		// the variable testVariable is set to true as command (ack=false)
-		await this.setStateAsync("testVariable", true);
+		setTimeout(() => {
+			this.log.error("adapter timeout reached. Stopping adapter now.");
+			this.stop(); // stop adapter right here (on schedule mode)
+		}, this._adapter_timeout + this._adapter_randomness);
+	}
 
-		// same thing, but the value is flagged "ack"
-		// ack should be always set to true if the value is received from or acknowledged from the target system
-		await this.setStateAsync("testVariable", { val: true, ack: true });
+	/**
+	 * _queryRydServer
+	 */
+	async _queryRydServer() {
+		this.log.info("adapter will wait " + this._adapter_randomness + " ms (to spread server load)");
+		await this._sleep(this._adapter_randomness);
 
-		// same thing, but the state is deleted after 30s (getState will return null afterwards)
-		await this.setStateAsync("testVariable", { val: true, ack: true, expire: 30 });
+		try {
+			let response = await this._base_request({
+				method: 'POST',
+				url: this._ryd_api_server + '/auth%2Flogin%2Flocal',
+				body: JSON.stringify({
+					email: this.config.email,
+					password: this.config.password
+				})
+			});
 
-		// examples for the checkPassword/checkGroup functions
-		let result = await this.checkPasswordAsync("admin", "iobroker");
-		this.log.info("check user admin pw ioboker: " + result);
+			var userObj = JSON.parse(response);
+		} catch (error) {
+			this._rydServerError(error);
+		}
 
-		result = await this.checkGroupAsync("admin", "admin");
-		this.log.info("check group user admin group admin: " + result);
+		try {
+			this._ryd_auth_token = userObj.auth_token;
+			this._ryd_things = userObj.things;
+		} catch (error) {
+			this._rydInternalError(error);
+		}
+
+		// -- DEBUG
+/*
+		this._ryd_things = [
+			{"id":"1","role":"THING_OWNER","type":"CAR"},
+			{"id":"2","role":"THING_OWNER","type":"CAR"},
+			{"id":"3","role":"THING_OWNER","type":"CAR"}
+		];
+*/
+		// this.log.debug(userObj);
+		this.log.debug('user token: ' + this._ryd_auth_token);
+		this.log.debug('things('+ this._ryd_things.length + '): ' + JSON.stringify(this._ryd_things));
+
+		let things_obj = [];
+		await Promise.all(this._ryd_things.map(async thing => {
+			let response = await this._base_request({
+				url: this._ryd_api_server + '/things/' + thing.id + '/status?auth_token=' + this._ryd_auth_token
+			});
+
+			let thing_obj = JSON.parse(response);
+			things_obj[thing.id] = thing_obj.data;
+		})).then(() => {
+			this._createThings(things_obj).then(() => {
+				// update lastUpdate
+				this.setObjectNotExistsAsync("lastUpdate", {
+					type: "state",
+					common: {
+						name: "lastUpdate",
+						type: "number",
+						role: "date",
+						read: true,
+						write: false,
+					},
+					native: {},
+				}).then(() => {
+					this.setStateAsync("lastUpdate", new Date());
+					this.stop(); // stop adapter right here (on shedule mode)
+				}).catch((error) => {
+					this._rydInternalError(error);
+				});
+
+			}).catch((error) => {
+				this._rydInternalError(error);
+			});
+		}).catch((error) => {
+			this._rydServerError(error);
+		});
+	}
+
+	/**
+	 * _createThings
+	 */
+	async _createThings(things_obj) {
+		for (let id in things_obj) {
+			// console.log("=== id " + id + " ===");
+			// console.log(things_obj[id]);
+			let thing_obj = things_obj[id];
+
+			for (let p in thing_obj) {
+				if (typeof thing_obj[p] !== 'object') {
+					// console.log('create things.' + id + '.' + p);
+					await this.setObjectNotExistsAsync('things.' + id + '.' + p, {
+						type: 'state',
+						common: {
+							'name': p,
+							'role': 'state',
+							'type': typeof thing_obj[p],
+							'write': false,
+							'read': true
+						},
+						native: {}
+					});
+
+					await this.setState('things.' + id + '.' + p, {val : thing_obj[p], ack : true});
+				} else {
+					let sub_thing_obj = thing_obj[p];
+					if (this._think_properties.includes(p)) {
+						for (let q in sub_thing_obj) {
+							// console.log("+ " + q);
+							await this.setObjectNotExistsAsync('things.' + id + '.' + p + '.' + q, {
+								type: 'state',
+								common: {
+									'name': p,
+									'role': 'state',
+									'type': typeof sub_thing_obj[q],
+									'write': false,
+									'read': true
+								},
+								native: {}
+							});
+
+							let value = (typeof sub_thing_obj[q] == 'object') ? JSON.stringify(sub_thing_obj[q]) : sub_thing_obj[q];
+							await this.setState('things.' + id + '.' + p + '.' + q, {val : value, ack : true});
+						}
+					} else {
+						if (!this._think_properties_ignore.includes(p)) {
+							this.log.debug('Unknown property: things.' + id + '.' + p);
+							this.log.debug(JSON.stringify(thing_obj[p]));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	async _sleep(ms) {
+		return new Promise(resolve => setTimeout(() => resolve(), ms));
+	}
+
+	/**
+	 * _rydServerError
+	 */
+	_rydServerError(error) {
+		// console.log(error);
+		this.log.error('request (' + error.options.url + ') failed ' + error.name + ' (' + error.statusCode + ')');
+
+		if (error.statusCode == 401) {
+			this.log.error("access denied. please check Ryd username and password!");
+		}
+
+		this.stop(); // stop adapter right here (on shedule mode)
+	}
+
+	/**
+	 * _rydServerError
+	 */
+	_rydInternalError(error) {
+		// console.log(error);
+		this.log.error(error);
+		this.stop(); // stop adapter right here (on shedule mode)
 	}
 
 	/**
@@ -86,61 +275,16 @@ class Ryd extends utils.Adapter {
 	 * @param {() => void} callback
 	 */
 	onUnload(callback) {
-		try {
-			this.log.info("cleaned everything up...");
-			callback();
-		} catch (e) {
-			callback();
+		if (!this._shutdown) {
+			try {
+				this.log.info(this.name + " stopped, cleaned everything up...");
+				this._shutdown = true;
+				callback();
+			} catch (e) {
+				callback();
+			}
 		}
 	}
-
-	/**
-	 * Is called if a subscribed object changes
-	 * @param {string} id
-	 * @param {ioBroker.Object | null | undefined} obj
-	 */
-	onObjectChange(id, obj) {
-		if (obj) {
-			// The object was changed
-			this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
-		} else {
-			// The object was deleted
-			this.log.info(`object ${id} deleted`);
-		}
-	}
-
-	/**
-	 * Is called if a subscribed state changes
-	 * @param {string} id
-	 * @param {ioBroker.State | null | undefined} state
-	 */
-	onStateChange(id, state) {
-		if (state) {
-			// The state was changed
-			this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-		} else {
-			// The state was deleted
-			this.log.info(`state ${id} deleted`);
-		}
-	}
-
-	// /**
-	//  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-	//  * Using this method requires "common.message" property to be set to true in io-package.json
-	//  * @param {ioBroker.Message} obj
-	//  */
-	// onMessage(obj) {
-	// 	if (typeof obj === "object" && obj.message) {
-	// 		if (obj.command === "send") {
-	// 			// e.g. send email or pushover or whatever
-	// 			this.log.info("send command");
-
-	// 			// Send response in callback if required
-	// 			if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
-	// 		}
-	// 	}
-	// }
-
 }
 
 // @ts-ignore parent is a valid property on module
