@@ -24,7 +24,7 @@ Ryd (TankTaler) ODB2 Adapter
 * Beta release
 
 ### 0.0.1
-* Initial release",
+* Initial release
 
 ## License
 MIT License
