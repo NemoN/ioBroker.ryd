@@ -15,16 +15,16 @@ Ryd (TankTaler) ODB2 Adapter
 
 ## Changelog
 ### 0.3.0 (2019-07-17)
-* First open beta release
+* (NemoN) First open beta release
 
 ### 0.2.1 (2019-07-16)
-* Configuration of internal parameters
+* (NemoN) Configuration of internal parameters
 
 ### 0.2.0 (2019-07-15)
-* Beta release
+* (NemoN) Beta release
 
 ### 0.0.1
-* Initial release
+* (NemoN) Initial release
 
 ## License
 MIT License
