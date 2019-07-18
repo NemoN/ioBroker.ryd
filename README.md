@@ -13,6 +13,10 @@
 
 Ryd (TankTaler) ODB2 Adapter
 
+## Known problems
+* *Problem:* Adapter not start, error message: `error: host.ioBrokerVM instance system.adapter.ryd.0 terminated with code 1 ()`
+* *Solution:* The Adapter needs at least NodeJS **8.x**, NodeJS 6.x and lower will not work
+
 ## Changelog
 ### 0.3.0 (2019-07-17)
 * (NemoN) First open beta release
