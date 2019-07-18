@@ -18,6 +18,9 @@ Ryd (TankTaler) ODB2 Adapter
 * *Solution:* The Adapter needs at least NodeJS **8.x**, NodeJS 6.x and lower will not work
 
 ## Changelog
+### 0.3.1 (2019-07-18)
+* (NemoN) Cleanup some internal functions
+
 ### 0.3.0 (2019-07-17)
 * (NemoN) First open beta release
 

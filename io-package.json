@@ -1,79 +1,83 @@
 {
-	"common": {
-		"name": "ryd",
-		"version": "0.3.0",
-		"news": {
-			"0.3.0": {
-				"en": "First open beta release",
-				"de": "Erste offene Betaversion"
-			},
-			"0.2.1": {
-				"en": "Configuration of internal parameters",
-				"de": "Konfiguration interne Parameter"
-			},
-			"0.2.0": {
-				"en": "Beta release",
-				"de": "Betaversion"
-			},
-			"0.0.1": {
-				"en": "Initial release",
-				"de": "Erstveröffentlichung"
-			}
-		},
-		"title": "Ryd (TankTaler) ODB2 Adapter",
-		"titleLang": {
-			"en": "Ryd (TankTaler) ODB2 Adapter",
-			"de": "Ryd (TankTaler) ODB2 Adapter"
-		},
-		"desc": {
-			"en": "Provides various vehicle data and location",
-			"de": "Liefert diverse Fahrzeugdaten und Standort"
-		},
-		"authors": [
-			"NemoN <thomas.oeding@gmail.com>"
-		],
-		"keywords": [
-	      "ryd",
-	      "tanktaler",
-	      "odb2",
-	      "car",
-	      "gps",
-	      "location"
-	    ],
-		"license": "MIT",
-		"platform": "Javascript/Node.js",
-		"main": "main.js",
-		"icon": "ryd.png",
-		"enabled": true,
-		"extIcon": "https://raw.githubusercontent.com/NemoN/ioBroker.ryd/master/admin/ryd.png",
-		"readme": "https://github.com/NemoN/ioBroker.ryd/blob/master/README.md",
-		"loglevel": "info",
-		"mode": "schedule",
-		"schedule": "*/15 * * * *",
-		"type": "geoposition",
-		"compact": true,
-		"materialize": true,
-		"dependencies": [
-			{
-				"js-controller": ">=1.4.2"
-			}
-		]
-	},
-	"native": {
-		"email": "",
-		"password": "",
-		"thinkProperties": "curLocation,parkingLocation,carOdometer,estimates,reportedFuelTotal,fuel",
-		"thinkPropertiesIgnore": "recurrences,openDtcs,score",
-		"adapterTimeout": 10000,
-		"clientDeviceType": "Android",
-		"clientDeviceId": "SM-G960F",
-		"clientDeviceVersion": "9.0.0",
-		"clientDeviceResolution": "2960x1440",
-		"rydApiServer": "https://tt4.thinxcloud.de",
-		"rydAppVersion": "2.35.1(190423000)",
-		"rydAppLocale": "de-de",
-		"rydAppInternalName": "TankTaler"
-	},
-	"objects": [],
-	"instanceObjects": []
+    "common": {
+        "name": "ryd",
+        "version": "0.3.1",
+        "news": {
+            "0.3.1": {
+                "en": "Cleanup some internal functions",
+                "de": "Optimierung interne Funktionen"
+            },
+            "0.3.0": {
+                "en": "First open beta release",
+                "de": "Erste offene Betaversion"
+            },
+            "0.2.1": {
+                "en": "Configuration of internal parameters",
+                "de": "Konfiguration interne Parameter"
+            },
+            "0.2.0": {
+                "en": "Beta release",
+                "de": "Betaversion"
+            },
+            "0.0.1": {
+                "en": "Initial release",
+                "de": "Erstveröffentlichung"
+            }
+        },
+        "title": "Ryd (TankTaler) ODB2 Adapter",
+        "titleLang": {
+            "en": "Ryd (TankTaler) ODB2 Adapter",
+            "de": "Ryd (TankTaler) ODB2 Adapter"
+        },
+        "desc": {
+            "en": "Provides various vehicle data and location",
+            "de": "Liefert diverse Fahrzeugdaten und Standort"
+        },
+        "authors": [
+            "NemoN <thomas.oeding@gmail.com>"
+        ],
+        "keywords": [
+            "ryd",
+            "tanktaler",
+            "odb2",
+            "car",
+            "gps",
+            "location"
+        ],
+        "license": "MIT",
+        "platform": "Javascript/Node.js",
+        "main": "main.js",
+        "icon": "ryd.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/NemoN/ioBroker.ryd/master/admin/ryd.png",
+        "readme": "https://github.com/NemoN/ioBroker.ryd/blob/master/README.md",
+        "loglevel": "info",
+        "mode": "schedule",
+        "schedule": "*/15 * * * *",
+        "type": "geoposition",
+        "compact": true,
+        "materialize": true,
+        "dependencies": [
+            {
+                "js-controller": ">=1.4.2"
+            }
+        ]
+    },
+    "native": {
+        "email": "",
+        "password": "",
+        "thinkProperties": "curLocation,parkingLocation,carOdometer,estimates,reportedFuelTotal,fuel",
+        "thinkPropertiesIgnore": "recurrences,openDtcs,score",
+        "adapterTimeout": 10000,
+        "clientDeviceType": "Android",
+        "clientDeviceId": "SM-G960F",
+        "clientDeviceVersion": "9.0.0",
+        "clientDeviceResolution": "2960x1440",
+        "rydApiServer": "https://tt4.thinxcloud.de",
+        "rydAppVersion": "2.35.1(190423000)",
+        "rydAppLocale": "de-de",
+        "rydAppInternalName": "TankTaler"
+    },
+    "objects": [],
+    "instanceObjects": []
 }

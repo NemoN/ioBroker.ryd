@@ -13,7 +13,6 @@ const uuid = require('uuid/v4');
 // const util = require('util');
 const http_request = require('request-promise-native');
 
-var gthis;
 
 class Ryd extends utils.Adapter {
 
@@ -36,11 +35,16 @@ class Ryd extends utils.Adapter {
 	 * Is called when databases are connected and adapter received configuration.
 	 */
 	async onReady() {
-		gthis = this;
-
+		// config
 		this._adapter_randomness = Math.floor(Math.random() * 60000 + 1); // add max 60 seconds randomness
 		this._adapter_timeout = parseInt(this.config.adapterTimeout, 10) || 10000;
 		this._adapter_delay = 10 * 60 * 1000; // in ms
+
+		// fallback
+		setTimeout(() => {
+			this.log.error("adapter timeout reached. Stopping adapter now.");
+			this.stop(); // stop adapter right here (on schedule mode)
+		}, this._adapter_timeout + this._adapter_randomness);
 
 		this._think_properties = this.config.thinkProperties.split(',');
 		this._think_properties_ignore = this.config.thinkPropertiesIgnore.split(',');
@@ -92,29 +96,27 @@ class Ryd extends utils.Adapter {
 		this.log.debug("think properties: " + this._think_properties);
 		this.log.debug("think properties ignore: " + this._think_properties_ignore);
 
-		await this.getState('lastUpdate', function (err, state) {
-			if (state != null) {
-				let now = new Date().getTime();
-				if (now < (state.ts + gthis._adapter_delay)) {
-					gthis.log.info("adapter ran less than " + (gthis._adapter_delay/1000) + " seconds earlier. trying again later.");
-					gthis.stop(); // stop adapter right here (on schedule mode)
-				}
+		try {
+			const state = await this.getStateAsync('lastUpdate');
+			const now = new Date().getTime();
+
+			if (now < (state.ts + this._adapter_delay)) {
+				this.log.info("adapter ran less than " + (this._adapter_delay/1000) + " seconds earlier. trying again later.");
+				this.stop(); // stop adapter right here (on schedule mode)
+				return false;
 			}
-		});
+		} catch (e) {
+			// handle error here
+		}
 
 		this._queryRydServer();
-
-		setTimeout(() => {
-			this.log.error("adapter timeout reached. Stopping adapter now.");
-			this.stop(); // stop adapter right here (on schedule mode)
-		}, this._adapter_timeout + this._adapter_randomness);
 	}
 
 	/**
 	 * _queryRydServer
 	 */
 	async _queryRydServer() {
-		this.log.info("adapter will wait " + this._adapter_randomness + " ms (to spread server load)");
+		this.log.debug("adapter will wait " + this._adapter_randomness + " ms (to spread server load)");
 		await this._sleep(this._adapter_randomness);
 
 		try {
@@ -277,7 +279,7 @@ class Ryd extends utils.Adapter {
 	onUnload(callback) {
 		if (!this._shutdown) {
 			try {
-				this.log.info(this.name + " stopped, cleaned everything up...");
+				this.log.debug(this.name + " stopped, cleaned everything up...");
 				this._shutdown = true;
 				callback();
 			} catch (e) {
