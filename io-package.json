@@ -24,10 +24,10 @@
                 "de": "Erstveröffentlichung"
             }
         },
-        "title": "Ryd (TankTaler) ODB2 Adapter",
+        "title": "Ryd (TankTaler) ODB2 iobroker adapter",
         "titleLang": {
-            "en": "Ryd (TankTaler) ODB2 Adapter",
-            "de": "Ryd (TankTaler) ODB2 Adapter"
+            "en": "Ryd (TankTaler) ODB2 iobroker adapter",
+            "de": "Ryd (TankTaler) ODB2 iobroker adapter"
         },
         "desc": {
             "en": "Provides various vehicle data and location",
