@@ -11,7 +11,9 @@
 
 ## Ryd adapter for ioBroker
 
-Ryd (TankTaler) ODB2 Adapter
+[Ryd](https://de.ryd.one/) (previously known as *TankTaler*) ODB2 Adapter
+
+![Ryd Box](https://de.ryd.one/wp-content/uploads/2019/06/ryd_Shop_Phone_and_Dongle_CH.png)
 
 ## Known problems
 * *Problem:* Adapter not start, error message: `error: host.ioBrokerVM instance system.adapter.ryd.0 terminated with code 1 ()`
