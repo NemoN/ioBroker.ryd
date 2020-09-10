@@ -281,6 +281,7 @@ class Ryd extends utils.Adapter {
 			try {
 				this.log.debug(this.name + " stopped, cleaned everything up...");
 				this._shutdown = true;
+				clearTimeout();
 				callback();
 			} catch (e) {
 				callback();

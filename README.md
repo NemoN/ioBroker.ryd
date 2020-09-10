@@ -20,6 +20,10 @@
 * *Solution:* The Adapter needs at least NodeJS **8.x**, NodeJS 6.x and lower will not work
 
 ## Changelog
+
+### 0.3.3 (2020-09-10)
+* (NemoN) Cleanup some internal functions
+
 ### 0.3.1 (2019-07-18)
 * (NemoN) Cleanup some internal functions
 
@@ -38,7 +42,7 @@
 ## License
 MIT License
 
-Copyright (c) 2019 Thomas Oeding
+Copyright (c) 2020 Thomas Oeding
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
