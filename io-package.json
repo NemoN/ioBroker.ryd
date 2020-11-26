@@ -78,7 +78,7 @@
         "clientDeviceVersion": "9.0.0",
         "clientDeviceResolution": "2960x1440",
         "rydApiServer": "https://tt4.thinxcloud.de",
-        "rydAppVersion": "2.35.1(190423000)",
+        "rydAppVersion": "2.52.4(201008000)",
         "rydAppLocale": "de-de",
         "rydAppInternalName": "TankTaler"
     },
