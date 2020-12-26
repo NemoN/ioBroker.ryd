@@ -59,6 +59,8 @@
         "mode": "schedule",
         "schedule": "*/15 * * * *",
         "type": "geoposition",
+        "connectionType": "cloud",
+        "dataSource": "poll",
         "compact": true,
         "materialize": true,
         "dependencies": [
