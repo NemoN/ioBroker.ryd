@@ -42,7 +42,7 @@ class Ryd extends utils.Adapter {
 
 		// fallback
 		setTimeout(() => {
-			this.log.error("adapter timeout reached. Stopping adapter now.");
+			this.log.error("Adapter timeout reached. Stopping adapter now.");
 			this.stop(); // stop adapter right here (on schedule mode)
 		}, this._adapter_timeout + this._adapter_randomness);
 
@@ -50,11 +50,11 @@ class Ryd extends utils.Adapter {
 		this._think_properties_ignore = this.config.thinkPropertiesIgnore.split(',');
 
 		if (!this.config.email) {
-			this.log.info("setup missing: email is empty. stopping adapter now.");
+			this.log.info("Setup missing: Email is empty. Stopping adapter now.");
 			this.stop();
 			return false;
 		} else if (!this.config.password) {
-			this.log.info("setup missing: password empty. stopping adapter now.");
+			this.log.info("Setup missing: Password empty. Stopping adapter now.");
 			this.stop();
 			return false;
 		}
@@ -91,20 +91,21 @@ class Ryd extends utils.Adapter {
 		    }
 		})
 
-		this.log.info("account: " + this.config.email);
-		this.log.debug("adapter timeout: " + this._adapter_timeout + " ms");
-		this.log.debug("think properties: " + this._think_properties);
-		this.log.debug("think properties ignore: " + this._think_properties_ignore);
+		this.log.info("Account: " + this.config.email);
+		this.log.debug("Adapter timeout: " + this._adapter_timeout + " ms");
+		this.log.debug("Think properties: " + this._think_properties);
+		this.log.debug("Think properties ignore: " + this._think_properties_ignore);
 
 		try {
 			const state = await this.getStateAsync('lastUpdate');
 			const now = new Date().getTime();
-
+/*
 			if (now < (state.ts + this._adapter_delay)) {
-				this.log.info("adapter ran less than " + (this._adapter_delay/1000) + " seconds earlier. trying again later.");
+				this.log.info("Adapter ran less than " + (this._adapter_delay/1000) + " seconds earlier. Try it again later.");
 				this.stop(); // stop adapter right here (on schedule mode)
 				return false;
 			}
+*/
 		} catch (e) {
 			// handle error here
 		}
@@ -116,7 +117,7 @@ class Ryd extends utils.Adapter {
 	 * _queryRydServer
 	 */
 	async _queryRydServer() {
-		this.log.debug("adapter will wait " + this._adapter_randomness + " ms (to spread server load)");
+		this.log.debug("Adapter will wait " + this._adapter_randomness + " ms (to distribute server load)");
 		await this._sleep(this._adapter_randomness);
 
 		try {
@@ -150,8 +151,8 @@ class Ryd extends utils.Adapter {
 		];
 */
 		// this.log.debug(userObj);
-		this.log.debug('user token: ' + this._ryd_auth_token);
-		this.log.debug('things('+ this._ryd_things.length + '): ' + JSON.stringify(this._ryd_things));
+		// this.log.debug('user token: ' + this._ryd_auth_token);
+		this.log.debug('Things('+ this._ryd_things.length + '): ' + JSON.stringify(this._ryd_things));
 
 		let things_obj = [];
 		await Promise.all(this._ryd_things.map(async thing => {
@@ -176,6 +177,17 @@ class Ryd extends utils.Adapter {
 					native: {},
 				}).then(() => {
 					this.setStateAsync("lastUpdate", new Date());
+
+					try {
+						let response = this._base_request({
+							url: this._ryd_api_server + '/auth%2Flogout?auth_token=' + this._ryd_auth_token
+						});
+						this.log.debug("Done. Logout User.");
+						// this.log.debug(util.inspect(response));
+					} catch (error) {
+						this._rydServerError(error);
+					}
+
 					this.stop(); // stop adapter right here (on shedule mode)
 				}).catch((error) => {
 					this._rydInternalError(error);
@@ -257,7 +269,7 @@ class Ryd extends utils.Adapter {
 		this.log.error('request (' + error.options.url + ') failed ' + error.name + ' (' + error.statusCode + ')');
 
 		if (error.statusCode == 401) {
-			this.log.error("access denied. please check Ryd username and password!");
+			this.log.error("Access denied. Please check Ryd username and password!");
 		}
 
 		this.stop(); // stop adapter right here (on shedule mode)

@@ -13,13 +13,18 @@
 
 [Ryd](https://de.ryd.one/) (previously known as *TankTaler*) ODB2 Adapter
 
-![Ryd Box](https://de.ryd.one/wp-content/uploads/2019/06/ryd_Shop_Phone_and_Dongle_CH.png)
+## Important notice
+
+This adapter does *not* use the official API, there may be problems/side effects in the official Ryd app. Please do not open Ryd support tickets in this case.
 
 ## Known problems
 * *Problem:* Adapter not start, error message: `error: host.ioBrokerVM instance system.adapter.ryd.0 terminated with code 1 ()`
 * *Solution:* The Adapter needs at least NodeJS **8.x**, NodeJS 6.x and lower will not work
 
 ## Changelog
+
+### 0.3.4 (2021-09-10)
+* (NemoN) Optimize user/token handling
 
 ### 0.3.3 (2020-09-10)
 * (NemoN) Cleanup some internal functions
@@ -42,7 +47,7 @@
 ## License
 MIT License
 
-Copyright (c) 2020 Thomas Oeding
+Copyright (c) 2021 Thomas Oeding
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

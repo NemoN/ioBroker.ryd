@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "ryd",
-        "version": "0.3.3",
+        "version": "0.3.4",
         "news": {
+            "0.3.4": {
+                "en": "Optimize user/token handling",
+                "de": "Optimierung User/Token Verwaltung"
+            },
             "0.3.3": {
                 "en": "Cleanup some internal functions",
                 "de": "Optimierung interne Funktionen"
