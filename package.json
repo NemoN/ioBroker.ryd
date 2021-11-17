@@ -1,6 +1,6 @@
 {
   "name": "iobroker.ryd",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Ryd Box (former TankTaler) car locator",
   "author": {
     "name": "NemoN",

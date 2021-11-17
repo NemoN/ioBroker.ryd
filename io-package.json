@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "ryd",
-        "version": "0.3.4",
+        "version": "0.3.5",
         "news": {
+            "0.3.5": {
+                "en": "Reuse auth token",
+                "de": "Wiederverwendung des Auth Tokens"
+            },
             "0.3.4": {
                 "en": "Optimize user/token handling",
                 "de": "Optimierung User/Token Verwaltung"

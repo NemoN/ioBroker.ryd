@@ -26,7 +26,7 @@ This adapter does *not* use the official API, there may be problems/side effects
 ### 0.3.5 (2021-11-24)
 * (92lleo) Reuse auth token
 
-### 0.3.4 (2021-09-10)
+### 0.3.4 (2021-11-12)
 * (NemoN) Optimize user/token handling
 
 ### 0.3.3 (2020-09-10)
