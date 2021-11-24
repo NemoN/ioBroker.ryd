@@ -13,6 +13,9 @@ const uuid = require('uuid/v4');
 // const util = require('util');
 const http_request = require('request-promise-native');
 
+// for debug url and randomness
+const debug = false;
+
 
 class Ryd extends utils.Adapter {
 
@@ -60,7 +63,9 @@ class Ryd extends utils.Adapter {
 		}
 
 		this._ryd_api_server = this.config.rydApiServer;
-		// this._ryd_api_server = 'http://www.nemon.org/ryd'; // DEBUG
+		if(debug){
+			this._ryd_api_server = 'http://www.nemon.org/ryd'; // DEBUG
+		}
 
 		this._client_device_type = this.config.clientDeviceType;
 		this._client_device_id = this.config.clientDeviceId;
@@ -150,8 +155,7 @@ class Ryd extends utils.Adapter {
 			{"id":"3","role":"THING_OWNER","type":"CAR"}
 		];
 */
-		// this.log.debug(userObj);
-		// this.log.debug('user token: ' + this._ryd_auth_token);
+
 		this.log.debug('Things('+ this._ryd_things.length + '): ' + JSON.stringify(this._ryd_things));
 
 		let things_obj = [];
