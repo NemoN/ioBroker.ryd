@@ -13,6 +13,9 @@ const uuid = require('uuid/v4');
 // const util = require('util');
 const http_request = require('request-promise-native');
 
+// for debug url and randomness
+const debug = false;
+
 
 class Ryd extends utils.Adapter {
 
@@ -60,7 +63,9 @@ class Ryd extends utils.Adapter {
 		}
 
 		this._ryd_api_server = this.config.rydApiServer;
-		// this._ryd_api_server = 'http://www.nemon.org/ryd'; // DEBUG
+		if(debug){
+			this._ryd_api_server = 'http://www.nemon.org/ryd'; // DEBUG
+		}
 
 		this._client_device_type = this.config.clientDeviceType;
 		this._client_device_id = this.config.clientDeviceId;
@@ -72,8 +77,14 @@ class Ryd extends utils.Adapter {
 		this._ryd_app_platform = this._client_device_type + ' [' + this._client_device_id + ',' + this._client_device_version + ',' + this._client_device_resolution + ']';
 		this._ryd_app_user_agent = this.config.rydAppInternalName + '/' + this._ryd_app_version + '(' + this._client_device_id + '; ' + this._client_device_type + ' ' + this._client_device_version + ')';
 
-		this._ryd_auth_token = '';
-		this._ryd_things = [ {} ];
+		try {
+			this._ryd_auth_token = (await this.getStateAsync('authToken')).val;
+			this._ryd_things = JSON.parse((await this.getStateAsync('rydThings')).val);
+		} catch (error) {
+			// do not stop adapter, will be resolved with login
+			this._resetUserStates();
+			this.log.debug("read user states:" + error);
+		}
 
 		this._base_request = http_request.defaults({
 		    gzip: true,
@@ -110,20 +121,44 @@ class Ryd extends utils.Adapter {
 			// handle error here
 		}
 
+		await this._createUserStates();
+
 		this._queryRydServer();
 	}
 
-	/**
-	 * _queryRydServer
-	 */
-	async _queryRydServer() {
-		this.log.debug("Adapter will wait " + this._adapter_randomness + " ms (to distribute server load)");
-		await this._sleep(this._adapter_randomness);
+	async _createUserStates() {
+		await this.setObjectNotExistsAsync("authToken", {
+			type: "state",
+			common: {
+				name: "authToken",
+				type: "string",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
 
+		await this.setObjectNotExistsAsync("rydThings", {
+			type: "state",
+			common: {
+				name: "rydThings",
+				type: "json",
+				role: "value",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
+	}
+
+	async _loginRydServer() {
+		this.log.debug("Trying to (re) log in");
 		try {
 			let response = await this._base_request({
 				method: 'POST',
-				url: this._ryd_api_server + '/auth%2Flogin%2Flocal',
+				// url: this._ryd_api_server + '/auth%2Flogin%2Flocal',
+				url: this._ryd_api_server + '/auth/login/local',
 				body: JSON.stringify({
 					email: this.config.email,
 					password: this.config.password
@@ -132,15 +167,48 @@ class Ryd extends utils.Adapter {
 
 			var userObj = JSON.parse(response);
 		} catch (error) {
-			this._rydServerError(error);
+			await this._rydServerError(error);
+			return false;
 		}
+
+		this.log.debug("Login successful");
 
 		try {
 			this._ryd_auth_token = userObj.auth_token;
 			this._ryd_things = userObj.things;
+
+			this.log.debug("login: auth token: "+userObj.auth_token.substr(0,5) +", things: "+JSON.stringify(this._ryd_things),);
+
+			await this.setStateAsync("authToken", this._ryd_auth_token, true);
+			await this.setStateAsync("rydThings", JSON.stringify(this._ryd_things), true);
+
+			return true;
 		} catch (error) {
+			this._resetUserStates();
 			this._rydInternalError(error);
+			return false;
 		}
+	}
+
+	/**
+	 * _queryRydServer
+	 */
+	async _queryRydServer() {
+		if(!debug){
+			this.log.debug("Adapter will wait " + this._adapter_randomness + " ms (to distribute server load)");
+			await this._sleep(this._adapter_randomness);
+		}
+
+		if ((this._ryd_auth_token == null || !(typeof this._ryd_auth_token == "string") || this._ryd_auth_token === "")
+			|| (this._ryd_things == null || this._ryd_things == undefined))
+		{
+			this.log.info("No auth token or things, triggering login");
+			await this._loginRydServer();
+		} else {
+			this.log.debug("Auth token and things present, continuing");
+		}
+
+		this.log.debug("_queryRydServer: auth token: " + this._ryd_auth_token.substr(0,5) + ", things:" + JSON.stringify(this._ryd_things));
 
 		// -- DEBUG
 /*
@@ -150,8 +218,7 @@ class Ryd extends utils.Adapter {
 			{"id":"3","role":"THING_OWNER","type":"CAR"}
 		];
 */
-		// this.log.debug(userObj);
-		// this.log.debug('user token: ' + this._ryd_auth_token);
+
 		this.log.debug('Things('+ this._ryd_things.length + '): ' + JSON.stringify(this._ryd_things));
 
 		let things_obj = [];
@@ -177,7 +244,7 @@ class Ryd extends utils.Adapter {
 					native: {},
 				}).then(() => {
 					this.setStateAsync("lastUpdate", new Date());
-
+					/**
 					try {
 						let response = this._base_request({
 							url: this._ryd_api_server + '/auth%2Flogout?auth_token=' + this._ryd_auth_token
@@ -187,6 +254,7 @@ class Ryd extends utils.Adapter {
 					} catch (error) {
 						this._rydServerError(error);
 					}
+					*/
 
 					this.stop(); // stop adapter right here (on shedule mode)
 				}).catch((error) => {
@@ -264,24 +332,34 @@ class Ryd extends utils.Adapter {
 	/**
 	 * _rydServerError
 	 */
-	_rydServerError(error) {
+	async _rydServerError(error) {
 		// console.log(error);
 		this.log.error('request (' + error.options.url + ') failed ' + error.name + ' (' + error.statusCode + ')');
 
 		if (error.statusCode == 401) {
-			this.log.error("Access denied. Please check Ryd username and password!");
+			this.log.error("Access denied. Please check Ryd username and password! Trying to login again next time");
+			await this._resetUserStates();
 		}
 
-		this.stop(); // stop adapter right here (on shedule mode)
+		this.stop(); // stop adapter right here (on schedule mode)
 	}
 
 	/**
-	 * _rydServerError
+	 * _rydInternalError
 	 */
 	_rydInternalError(error) {
 		// console.log(error);
 		this.log.error(error);
-		this.stop(); // stop adapter right here (on shedule mode)
+		this.stop(); // stop adapter right here (on schedule mode)
+	}
+
+	/**
+	 * _resetUserStates
+	 */
+	async _resetUserStates() {
+		this.log.debug("resetting authToken and rydThings");
+		await this.setStateAsync("authToken", "", true);
+		await this.setStateAsync("rydThings", "", true);
 	}
 
 	/**
