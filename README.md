@@ -2,12 +2,9 @@
 
 [![NPM version](http://img.shields.io/npm/v/iobroker.ryd.svg)](https://www.npmjs.com/package/iobroker.ryd)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.ryd.svg)](https://www.npmjs.com/package/iobroker.ryd)
-[![Dependency Status](https://img.shields.io/david/NemoN/iobroker.ryd.svg)](https://david-dm.org/NemoN/iobroker.ryd)
 [![Known Vulnerabilities](https://snyk.io/test/github/NemoN/ioBroker.ryd/badge.svg)](https://snyk.io/test/github/NemoN/ioBroker.ryd)
 
 [![NPM](https://nodei.co/npm/iobroker.ryd.png?downloads=true)](https://nodei.co/npm/iobroker.ryd/)
-
-**Tests:**: [![Travis-CI](http://img.shields.io/travis/NemoN/ioBroker.ryd/master.svg)](https://travis-ci.org/NemoN/ioBroker.ryd)
 
 ## Ryd adapter for ioBroker
 
