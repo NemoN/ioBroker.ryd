@@ -150,6 +150,18 @@ class Ryd extends utils.Adapter {
 			},
 			native: {},
 		});
+
+		await this.setObjectNotExistsAsync("lastUpdate", {
+			type: "state",
+			common: {
+				name: "lastUpdate",
+				type: "number",
+				role: "date",
+				read: true,
+				write: true,
+			},
+			native: {},
+		});
 	}
 
 	async _loginRydServer() {
@@ -231,41 +243,25 @@ class Ryd extends utils.Adapter {
 			things_obj[thing.id] = thing_obj.data;
 		})).then(() => {
 			this._createThings(things_obj).then(() => {
-				// update lastUpdate
-				this.setObjectNotExistsAsync("lastUpdate", {
-					type: "state",
-					common: {
-						name: "lastUpdate",
-						type: "number",
-						role: "date",
-						read: true,
-						write: false,
-					},
-					native: {},
-				}).then(() => {
-					this.setStateAsync("lastUpdate", new Date());
-					/**
-					try {
-						let response = this._base_request({
-							url: this._ryd_api_server + '/auth%2Flogout?auth_token=' + this._ryd_auth_token
-						});
-						this.log.debug("Done. Logout User.");
-						// this.log.debug(util.inspect(response));
-					} catch (error) {
-						this._rydServerError(error);
-					}
-					*/
+				this.setStateAsync("lastUpdate", new Date());
+				/**
+				try {
+					let response = this._base_request({
+						url: this._ryd_api_server + '/auth%2Flogout?auth_token=' + this._ryd_auth_token
+					});
+					this.log.debug("Done. Logout User.");
+					// this.log.debug(util.inspect(response));
+				} catch (error) {
+					this._rydServerError(error);
+				}
+				*/
 
-					this.stop(); // stop adapter right here (on shedule mode)
-				}).catch((error) => {
-					this._rydInternalError(error);
-				});
-
+				this.stop(); // stop adapter right here (on shedule mode)
 			}).catch((error) => {
 				this._rydInternalError(error);
 			});
 		}).catch((error) => {
-			this._rydServerError(error);
+			this._rydInternalError(error);
 		});
 	}
 
