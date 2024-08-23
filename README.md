@@ -10,9 +10,11 @@
 
 [Ryd](https://de.ryd.one/) (previously known as *TankTaler*) ODB2 Adapter
 
-## Important notice
+## Important notices
 
-This adapter does *not* use the official API, there may be problems/side effects in the official Ryd app. Please do not open Ryd support tickets in this case.
+* The services of the ryd box were discontinued on 30.04.2024 (https://www.ryd.one/de-de/ryd-box/)
+* The following option is available to continue operating the hardware box: https://github.com/beabel/Ryd_Tanktaler
+* This adapter does *not* use the official API, there may be problems/side effects in the official Ryd app. Please do not open Ryd support tickets in this case.
 
 ## Known problems
 * *Problem:* Adapter not start, error message: `error: host.ioBrokerVM instance system.adapter.ryd.0 terminated with code 1 ()`
